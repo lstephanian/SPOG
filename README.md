@@ -1,0 +1,2 @@
+# SPOG
+Simple ParticipatiOn Governance
