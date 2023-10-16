@@ -23,6 +23,8 @@ contract Round is Ownable(msg.sender) {
 
     event RoundCreated(bool);
     event RoundEnded(bool);
+    event VoteSubmitted(uint, uint);
+    event VotesTallied(uint, uint, uint);
     event BitRefundReceived(address, uint);
 
     constructor (address _tokenAddress){
@@ -37,19 +39,22 @@ contract Round is Ownable(msg.sender) {
     }
 
     function vote(uint _voteType) public {
-        require(_voteType == 0 || _voteType == 1 || _voteType == 2, 'Needs to be in range');
-        
+        require(_voteType == 0 || _voteType == 1 || _voteType == 2, 'needs to be in range');
+        require(voteMap[msg.sender] == 0, 'can only vote once');
+
         voteMap[msg.sender] = _voteType;
 
         if (_voteType==0){
             votesAbstain += 1;
-            
+            emit VoteSubmitted(_voteType, votesAbstain);
         }
         if (_voteType==1){
             votesUninformed += 1;
+            emit VoteSubmitted(_voteType, votesUninformed);
         }
         if (_voteType==2) {
             votesInformed += 1;
+            emit VoteSubmitted(_voteType, votesInformed);
         }
     }
 
@@ -72,6 +77,7 @@ contract Round is Ownable(msg.sender) {
         if (b-v > 0) {
             abstainedClaimable = b-v;
         }
+        emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
     
     function tallyVotesFREE() public onlyOwner {
@@ -85,11 +91,9 @@ contract Round is Ownable(msg.sender) {
         }
         if (b > 0) {
             uninformedClaimable = b;
-        }
-        if (b > 0) {
             abstainedClaimable = b;
         }
-
+        emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
 
     function claimFunds() public {
@@ -109,6 +113,7 @@ contract Round is Ownable(msg.sender) {
         
         ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
         exp.transfer(msg.sender, amount);
+        withdrawalMap[msg.sender] = true;
         
         emit BitRefundReceived(msg.sender, amount);
     }
