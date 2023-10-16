@@ -28,18 +28,32 @@ describe("RoundFactory", function () {
 
   describe("Create Round", function () {
     it("only owner should be able to access", async function () {
-
+      await expect(rfContract.connect(addr1).createRound(expContractAddy, 10))
+        .to.be.reverted;
+      await expect(await rfContract.connect(owner).createRound(expContractAddy, 10))
+        .to.emit(rfContract, "RoundCreated");     
     });
     it("should create a new round", async function () {
-
+      await expect(await rfContract.connect(owner).createRound(expContractAddy, 10))
+        .to.emit(rfContract, "RoundCreated");
+      
     });
     it("should mint tokens to round contract", async function () {
-
+      let mintAmount = 10;
+      await rfContract.connect(owner).createRound(expContractAddy, mintAmount);
+      let allRounds = await rfContract.connect(owner).allRounds();    
+      let expBalance = await expContract.balanceOf(allRounds[0]);
+      expect(await expContract.balanceOf(allRounds[0]))
+        .to.equal(mintAmount);
     });
   });
   describe("AllRounds", function () {
     it("should return a list of addresses for all existing rounds", async function () {
-     
+      await rfContract.connect(owner).createRound(expContractAddy, 10);
+      await rfContract.connect(owner).createRound(expContractAddy, 10);
+
+      let rf = await rfContract.connect(owner).allRounds()      
+      expect(rf.length).to.equal(2);
     });
   });
 });

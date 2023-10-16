@@ -8,16 +8,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract RoundFactory is Ownable(msg.sender) {
     address[] public rounds;
     event RoundCreated(address);
+    event AllRounds(address[]);
+    ExperimentToken exp = new ExperimentToken();
 
     //create our 4 auctions
     function createRound(address _ExperimentTokenAddress, uint _roundMintAmount) public onlyOwner {
         Round round = new Round(_ExperimentTokenAddress);
         rounds.push(address(round));
 
-        //mint tokens to each round
-        ExperimentToken exp = new ExperimentToken();
+        //auto mint tokens to each round
         exp.mint(address(round), _roundMintAmount);
-
         emit RoundCreated(address(round));
     }
 
