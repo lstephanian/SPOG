@@ -18,21 +18,15 @@ contract Round is Ownable(msg.sender) {
     mapping(address => uint) private voteMap;
     mapping(address => bool) private withdrawalMap;
 
-    uint public immutable MINT_AMOUNT;
     address public immutable TOKEN_ADDRESS;
     bool public ended;
 
     event RoundCreated(bool);
     event RoundEnded(bool);
     event BitRefundReceived(address, uint);
-    ExperimentToken exp;
 
-    constructor (address _ticketAddress, uint _roundMintAmount){
-        TOKEN_ADDRESS = _ticketAddress;
-        MINT_AMOUNT = _roundMintAmount;
-
-        exp = ExperimentToken(TOKEN_ADDRESS);
-        exp.mint(msg.sender, MINT_AMOUNT);
+    constructor (address _tokenAddress){
+        TOKEN_ADDRESS = _tokenAddress;
 
         emit RoundCreated(true);
     }
@@ -113,6 +107,7 @@ contract Round is Ownable(msg.sender) {
             amount = votesInformed;
         }
         
+        ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
         exp.transfer(msg.sender, amount);
         
         emit BitRefundReceived(msg.sender, amount);
