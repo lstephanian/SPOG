@@ -155,7 +155,10 @@ describe("Round", function () {
         .to.be.revertedWith('round is still open');
     });
     it("should allow anyone to try to claim", async function () {
-
+      newRound7 = await round.waitForDeployment();
+      await newRound7.connect(owner).closeRound();
+      expect(newRound7.connect(addr1).claimFunds())
+        .to.emit(newRound7, "BitRefundReceived");
     });
   });
 });
