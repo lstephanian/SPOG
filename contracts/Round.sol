@@ -19,7 +19,7 @@ contract Round is Ownable(msg.sender) {
     mapping(address => bool) private withdrawalMap;
 
     address public immutable TOKEN_ADDRESS;
-    bool public ended;
+    bool public ended = false;
 
     event RoundCreated(bool);
     event RoundEnded(bool);
