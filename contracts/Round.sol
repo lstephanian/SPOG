@@ -26,6 +26,8 @@ contract Round is Ownable(msg.sender) {
     event VoteSubmitted(uint, uint);
     event VotesTallied(uint, uint, uint);
     event BitRefundReceived(address, uint);
+    ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
+
 
     constructor (address _tokenAddress){
         TOKEN_ADDRESS = _tokenAddress;
@@ -62,7 +64,7 @@ contract Round is Ownable(msg.sender) {
         require(ended, 'round is still open');
 
         uint votesTotal = votesInformed + votesUninformed;
-        uint b = (votesTotal/2 - votesUninformed/votesTotal) * votesInformed / votesTotal; 
+        uint b = (votesTotal/2 - votesUninformed / votesTotal) * votesInformed / votesTotal; 
         uint v = ((votesTotal - 1) / (votesTotal ^ 2)) + (1  / votesTotal);
         if (v * 10 > .3 * 10) {
             v = .3 * 10;
@@ -100,7 +102,7 @@ contract Round is Ownable(msg.sender) {
         require(ended, 'round is still open');
         require(withdrawalMap[msg.sender] == false, 'can only withdraw once');
         uint amount;
-        
+
         if (voteMap[msg.sender] == 0){
             amount = abstainedClaimable;
         }
@@ -111,10 +113,9 @@ contract Round is Ownable(msg.sender) {
             amount = votesInformed;
         }
         
-        ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
-        exp.transfer(msg.sender, amount);
-        withdrawalMap[msg.sender] = true;
-        
         emit BitRefundReceived(msg.sender, amount);
+        withdrawalMap[msg.sender] = true;
+
+        exp.transfer(msg.sender, amount);
     }
 }
