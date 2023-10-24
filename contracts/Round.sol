@@ -109,12 +109,12 @@ contract Round is Ownable(msg.sender) {
         }
         if (voteMap[msg.sender] == 2){
             amount = votesInformed;
-        }
-        
-        ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
-        exp.transfer(msg.sender, amount);
-        withdrawalMap[msg.sender] = true;
+        }        
         
         emit BitRefundReceived(msg.sender, amount);
+        withdrawalMap[msg.sender] = true;
+        
+        ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
+        require(exp.transfer(msg.sender, amount));
     }
 }
