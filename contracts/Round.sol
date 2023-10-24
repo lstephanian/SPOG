@@ -26,7 +26,7 @@ contract Round is Ownable(msg.sender) {
     event VoteSubmitted(uint, uint);
     event VotesTallied(uint, uint, uint);
     event BitRefundReceived(address, uint);
-    ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
+    ExperimentToken exp;
 
 
     constructor (address _tokenAddress){
@@ -111,7 +111,6 @@ contract Round is Ownable(msg.sender) {
         }
         if (voteMap[msg.sender] == 2){
             amount = votesInformed;
-<<<<<<< HEAD
         }        
         
         emit BitRefundReceived(msg.sender, amount);
@@ -119,13 +118,5 @@ contract Round is Ownable(msg.sender) {
         
         ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
         require(exp.transfer(msg.sender, amount));
-=======
-        }
-        
-        emit BitRefundReceived(msg.sender, amount);
-        withdrawalMap[msg.sender] = true;
-
-        exp.transfer(msg.sender, amount);
->>>>>>> 0cdae051bcd41de1c2216b5fdd5996ece089f9e8
     }
 }
