@@ -116,7 +116,7 @@ contract Round is Ownable(msg.sender) {
         emit BitRefundReceived(msg.sender, amount);
         withdrawalMap[msg.sender] = true;
         
-        ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
+        exp = ExperimentToken(TOKEN_ADDRESS);
         require(exp.transfer(msg.sender, amount));
     }
 }
