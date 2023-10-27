@@ -1,7 +1,12 @@
-import pkg from 'gulp';
-const { task, series } = pkg;
 import nodemon from 'gulp-nodemon';
 import { exec } from 'child_process';
+import gulp from 'gulp';
+import pkg from 'gulp';
+import path from 'path';
+import fs from 'fs';
+import solc from 'solc';
+
+const { task, series } = pkg;
 
 task('vite-build', (cb) => {
   exec('vite build', (err, stdout, stderr) => {
@@ -13,12 +18,11 @@ task('vite-build', (cb) => {
 
 task('nodemon', (cb) => {
   let started = false;
-
   return nodemon({
     script: 'app.js',
     ext: '*',
     ignore: ['node_modules/'],
-    env: {'PROJECT_ID': '98e764db0ed63f35c3158eaec67adedb'},
+    // env: {'PROJECT_ID': ''},
   }).on('start', () => {
     if (!started) {
       cb();
@@ -26,5 +30,21 @@ task('nodemon', (cb) => {
     }
   });
 });
+
+gulp.task('compile-abi', (cb => {
+  const contractSource = '../../contracts/Round.sol';
+  var input = {
+    language: 'Solidity',
+    sources: {'Round.sol': {content: fs.readFileSync(contractSource, 'utf8')}},
+    settings: {outputSelection: {'*': {'*': ['*']}}}
+  }
+
+  var output = JSON.parse(solc.compile(JSON.stringify(input)));
+  for (var contractName in output.contracts['Round.sol']) {
+    console.log(contractName + ': ' + output.contracts['Round.sol'][contractName].evm.bytecode.object);
+  }
+
+  cb();
+}));
 
 task('default', series('vite-build', 'nodemon'));
