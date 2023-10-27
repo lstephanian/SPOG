@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %} - Demo{% endblock %}
+
+{% block css %}
+<style>
+#vote li a {
+  padding: 10px;
+  display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+  <h2>Demo</h2>
+
+  <br>
+  <p>User: <span id="user"></span></p>
+  <ul id="vote" class="nav flex-column">
+    <li><a href="#">Vote Uninformed</a></li>
+    <li><a href="#">Vote Informed</a></li>
+    <li><a href="#">Abstain</a></li>
+  </ul>
+</div>
+{% endblock %}
