@@ -1,6 +1,6 @@
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi'
 import { getContract, prepareWriteContract, writeContract, disconnect, getAccount, signMessage } from '@wagmi/core'
-import { mainnet, arbitrum } from '@wagmi/core/chains'
+import { mainnet, arbitrumGoerli, arbitrumNova, arbitrumSepolia, arbitrum } from '@wagmi/core/chains'
 
 // 1. Define constants
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
@@ -15,16 +15,19 @@ const metadata = {
 }
 
 const defaultChain = arbitrum
-const chains = [mainnet, defaultChain]
+arbitrumGoerli.name = 'Arb Goerli'
+arbitrumNova.name = 'Arb Nova'
+arbitrumSepolia.name = 'Arb Sepolia'
+const chains = [arbitrumGoerli, arbitrumNova, arbitrumSepolia, defaultChain]
 const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
 
 // 3. Create modal
 const modal = createWeb3Modal({ wagmiConfig, projectId, chains, defaultChain, themeMode: "light" })
-modal.subscribeState(newState => {
-  if (newState.open) {
-    disconnect()
-  }
-})
+// modal.subscribeState(newState => {
+//   if (newState.open) {
+//     disconnect()
+//   }
+// })
 
 let links = document.getElementsByClassName('contract-vote')
 for (let i = 0, iLength = links.length; i < iLength; i++) {
