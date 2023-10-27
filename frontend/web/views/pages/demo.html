@@ -11,9 +11,15 @@
 </style>
 {% endblock %}
 
+{% block js %}
+  <script type="module" src="/dist/{{ manifest['public/custom/wallet.js'].file }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid mt-3">
   <h2>Demo</h2>
+  <w3m-button></w3m-button>
+  <!-- <w3m-network-button> </w3m-network-button> -->
 
   <br>
   <p>User: <span id="user"></span></p>
