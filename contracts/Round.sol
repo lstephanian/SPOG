@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ExperimentToken } from './ExperimentToken.sol';
+import "@openzeppelin/contracts/utils/math";
 
 contract Round is Ownable(msg.sender) {
     uint votesUninformed;
@@ -113,10 +114,10 @@ contract Round is Ownable(msg.sender) {
             amount = votesInformed;
         }        
         
-        emit BitRefundReceived(msg.sender, amount);
         withdrawalMap[msg.sender] = true;
         
         exp = ExperimentToken(TOKEN_ADDRESS);
         require(exp.transfer(msg.sender, amount));
+        emit BitRefundReceived(msg.sender, amount);
     }
 }
