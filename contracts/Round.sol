@@ -3,17 +3,17 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 import { ExperimentToken } from './ExperimentToken.sol';
 
 contract Round is Ownable(msg.sender) {
-    uint votesUninformed;
-    uint votesInformed;
-    uint votesAbstain;
-    uint informedClaimable;
-    uint uninformedClaimable;
-    uint abstainedClaimable;
+    uint votesUninformed = 0;
+    uint votesInformed = 0;
+    uint votesAbstain = 0;
+    uint informedClaimable = 0;
+    uint uninformedClaimable = 0;
+    uint abstainedClaimable = 0;
 
     mapping(address => uint) private voteMap;
     mapping(address => bool) private withdrawalMap;
@@ -26,7 +26,7 @@ contract Round is Ownable(msg.sender) {
     event VoteSubmitted(uint, uint);
     event VotesTallied(uint, uint, uint);
     event BitRefundReceived(address, uint);
-    ExperimentToken exp = ExperimentToken(TOKEN_ADDRESS);
+    ExperimentToken exp;
 
 
     constructor (address _tokenAddress){
@@ -40,61 +40,74 @@ contract Round is Ownable(msg.sender) {
         emit RoundEnded(ended);
     }
 
+    function getRoundStatus() public view returns(bool) {
+        return(ended);
+    }
+
     function vote(uint _voteType) public {
-        require(_voteType == 0 || _voteType == 1 || _voteType == 2, 'needs to be in range');
+        require(_voteType > 0 && _voteType < 4, 'needs to be in range');
         require(voteMap[msg.sender] == 0, 'can only vote once');
 
         voteMap[msg.sender] = _voteType;
 
-        if (_voteType==0){
+        if (_voteType==1){
             votesAbstain += 1;
             emit VoteSubmitted(_voteType, votesAbstain);
         }
-        if (_voteType==1){
+        if (_voteType==2){
             votesUninformed += 1;
             emit VoteSubmitted(_voteType, votesUninformed);
         }
-        if (_voteType==2) {
+        if (_voteType==3) {
             votesInformed += 1;
             emit VoteSubmitted(_voteType, votesInformed);
         }
     }
 
+    function getVoterStatus(address beneficiary) public view returns(uint) {
+        return(voteMap[beneficiary]);
+    }
+
     function tallyVotesSPOG() public onlyOwner {
         require(ended, 'round is still open');
 
-        uint votesTotal = votesInformed + votesUninformed;
+        uint votesTotal = votesInformed + votesUninformed; 
+        require(votesTotal > 0, "no votes submitted");
+
         uint b = (votesTotal/2 - votesUninformed / votesTotal) * votesInformed / votesTotal; 
         uint v = ((votesTotal - 1) / (votesTotal ^ 2)) + (1  / votesTotal);
-        if (v * 10 > .3 * 10) {
-            v = .3 * 10;
+
+
+        // allows for up to 10**59 votes
+        if (v * 10**18 > 3 * 10**17) {
+            v = 3 * 10**17;
         }
 
-        if (b-1 > 0) {
+        if (b > 1) {
             informedClaimable = b-1;
         }
-        if (b > 0) {
-            uninformedClaimable = b;
-        }
-        if (b-v > 0) {
-            abstainedClaimable = b-v;
-        }
+
+        uninformedClaimable = b;
+        abstainedClaimable = b * 10**18 > v ? b * 10**18 - v : 0;
+
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
     
     function tallyVotesFREE() public onlyOwner {
         require(ended, 'round is still open');
-        
+
         uint votesTotal = votesInformed + votesUninformed;
+        require(votesTotal > 0, "no votes submitted");
+
         uint b = (votesTotal / 2 - votesUninformed / votesTotal) * votesInformed / votesTotal;
 
-        if (b-1 > 0) {
+        if (b > 1) {
             informedClaimable = b-1;
         }
-        if (b > 0) {
-            uninformedClaimable = b;
-            abstainedClaimable = b;
-        }
+
+        uninformedClaimable = b;
+        abstainedClaimable = b;
+        
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
 
@@ -112,10 +125,11 @@ contract Round is Ownable(msg.sender) {
         if (voteMap[msg.sender] == 2){
             amount = votesInformed;
         }
-        
-        emit BitRefundReceived(msg.sender, amount);
+
         withdrawalMap[msg.sender] = true;
 
-        exp.transfer(msg.sender, amount);
+        exp = ExperimentToken(TOKEN_ADDRESS);
+        require(exp.transfer(msg.sender, amount), "transfer failed");
+        emit BitRefundReceived(msg.sender, amount);
     }
 }
