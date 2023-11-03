@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %} - Demo{% endblock %}
+
+{% block css %}
+<style>
+#vote li a {
+  padding: 10px;
+  display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block js %}
+  <script type="module" src="/dist/{{ manifest['public/custom/wallet.js'].file }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+  <h2>Demo</h2>
+  <div class="d-flex justify-content-start">
+    <div class="p-2"><w3m-network-button> </w3m-network-button></div>
+    <div class="p-2"><w3m-button></w3m-button></div>
+  </div>
+
+  <br>
+  <ul id="vote" class="nav flex-column">
+    <li><a href="#" class="contract-vote" data-vote="1">Vote Uninformed</a></li>
+    <li><a href="#" class="contract-vote" data-vote="2">Vote Informed</a></li>
+    <li><a href="#" class="contract-vote" data-vote="0">Abstain</a></li>
+  </ul>
+</div>
+{% endblock %}

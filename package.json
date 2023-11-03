@@ -14,8 +14,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.0.0",
+    "@prb/math": "^4.0.1",
     "chai": "^4.3.10",
-    "glob": "^7.2.0",
-    "update": "^0.7.4"
+    "glob": "^7.2.0"
   }
 }

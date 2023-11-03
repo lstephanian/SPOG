@@ -14,12 +14,13 @@ contract RoundFactory is Ownable(msg.sender) {
     //create our 4 auctions
     function createRound(address _ExperimentTokenAddress, uint _roundMintAmount) public onlyOwner {
         Round round = new Round(_ExperimentTokenAddress);
-
+        
         emit RoundCreated(address(round));
         rounds.push(address(round));
-        
+
         //auto mint tokens to each round
-        exp.mint(address(round), _roundMintAmount);    }
+        exp.mint(address(round), _roundMintAmount);
+    }
 
     function allRounds() public view returns (address[] memory) {
         return rounds;
