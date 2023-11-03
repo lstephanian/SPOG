@@ -76,7 +76,7 @@ contract Round is Ownable(msg.sender) {
         require(votesTotal > 0, "no votes submitted");
 
         uint b = (votesTotal/2 - votesUninformed / votesTotal) * votesInformed / votesTotal; 
-        uint v = ((votesTotal - 1) / (votesTotal ^ 2)) + (1  / votesTotal);
+        uint v = ((votesTotal - 1) / (votesTotal * votesTotal)) + (1  / votesTotal);
 
 
         // allows for up to 10**59 votes
