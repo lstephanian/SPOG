@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 let { expect } = require('chai')
+const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs")
+
 
 describe("Round", function () {
   beforeEach(async function () {
@@ -94,14 +96,20 @@ describe("Round", function () {
   describe("Tally Votes", function () {
     describe("SPOG", function () {
       it("only owner can tally votes", async function () {
+        await roundContract.connect(addr1).vote(1);
+        await roundContract.connect(addr1).closeRound();
         expect(roundContract.connect(addr1).tallyVotesSPOG())
           .to.be.reverted;
       });
       it("requires round is closed", async function () {
-        //TODO
+        await roundContract.connect(addr1).vote(1);
+        expect(roundContract.connect(owner).tallyVotesSPOG())
+          .to.be.revertedWith('round is still open');
       });
       it("requires at least one vote", async function () {
-        //TODO
+        await roundContract.connect(addr1).closeRound();
+        expect(roundContract.connect(owner).tallyVotesSPOG())
+          .to.be.revertedWith('no votes submitted');
       });
 
       it("should tally votes as expected", async function () {
@@ -146,17 +154,9 @@ describe("Round", function () {
     it("should allow anyone to try to claim", async function () {
       newRound8 = await round.waitForDeployment();
       await newRound8.connect(owner).closeRound();
-
-      // @audit: You could add .withArgs(owner.address, anyValue) here
-      //
-      //         For the anyValue to work you need to import it:
-      //         const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs")
-
-      //         or
-      //
-      //         make the informedClaimable, uninformedClaimable and abstainedClaimable public and read them here
       expect(newRound8.connect(addr1).claimFunds())
-        .to.emit(newRound8, "BitRefundReceived");
+        .to.emit(newRound8, "BitRefundReceived")
+        .withArgs(owner.address, anyValue);
     });
   });
 });
