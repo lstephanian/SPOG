@@ -47,7 +47,7 @@ contract Round is Ownable(msg.sender) {
 
     function vote(uint _voteType) public {
         require(_voteType > 0 && _voteType < 4, 'needs to be in range');
-        require(voteMap[msg.sender] == 0, 'can only vote once');
+        require(voteMap[msg.sender] == [], 'can only vote once');
 
         voteMap[msg.sender] = _voteType;
 
@@ -80,17 +80,20 @@ contract Round is Ownable(msg.sender) {
 
 
         // allows for up to 10**59 votes
-        if (v * 10**18 > 3 * 10**17) {
-            v = 3 * 10**17;
+        if (v * 10**18 > 3**18) {
+            v = 3**18;
         }
 
         if (b > 1) {
             informedClaimable = b-1;
         }
 
-        uninformedClaimable = b;
-        abstainedClaimable = b * 10**18 > v ? b * 10**18 - v : 0;
-
+        if (b > 0) {
+            uninformedClaimable = b;
+        }
+        if (b-v > 0) {
+            abstainedClaimable = b * 10**18 > v ? b * 10**18 - v : 0;
+        }
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
     
@@ -106,9 +109,11 @@ contract Round is Ownable(msg.sender) {
             informedClaimable = b-1;
         }
 
-        uninformedClaimable = b;
-        abstainedClaimable = b;
-        
+        if (b > 0) {
+            uninformedClaimable = b;
+            abstainedClaimable = b;
+        }
+    
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
 
