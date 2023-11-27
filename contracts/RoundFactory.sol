@@ -2,6 +2,7 @@
 pragma solidity ^0.8.9;
 
 import './Round.sol';
+import { ExperimentToken } from './ExperimentToken.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 //note: this contract gets published first
 
@@ -11,7 +12,7 @@ contract RoundFactory is Ownable(msg.sender) {
     event AllRounds(address[]);
     ExperimentToken exp = new ExperimentToken();
 
-    //create our 4 auctions
+    //create round
     function createRound(address _ExperimentTokenAddress, uint _roundMintAmount) public onlyOwner {
         Round round = new Round(_ExperimentTokenAddress);
         

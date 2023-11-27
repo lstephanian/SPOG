@@ -89,7 +89,7 @@ describe("Round", function () {
     it("should update vote map", async function (){
       newRound6 = await round.waitForDeployment();
       let vote = await newRound6.connect(addr1).vote(1);
-      expect(await newRound6.getVoterStatus)
+      expect(await newRound6.getVoterStatus(addr1))
         .to.equal(1)
     });
   });
@@ -97,7 +97,7 @@ describe("Round", function () {
     describe("SPOG", function () {
       it("only owner can tally votes", async function () {
         await roundContract.connect(addr1).vote(1);
-        await roundContract.connect(addr1).closeRound();
+        await roundContract.connect(owner).closeRound();
         expect(roundContract.connect(addr1).tallyVotesSPOG())
           .to.be.reverted;
       });
@@ -107,33 +107,30 @@ describe("Round", function () {
           .to.be.revertedWith('round is still open');
       });
       it("requires at least one vote", async function () {
-        await roundContract.connect(addr1).closeRound();
+        await roundContract.connect(owner).closeRound();
         expect(roundContract.connect(owner).tallyVotesSPOG())
           .to.be.revertedWith('no votes submitted');
       });
 
       it("should tally votes as expected", async function () {
         newRound7 = await round.waitForDeployment();
+
         let vote1 = await newRound7.connect(addr1).vote(1);
+        let vote2 = await newRound7.connect(addr2).vote(1);
+        let vote3 = await newRound7.connect(addr3).vote(1);
         let vote4 = await newRound7.connect(addr4).vote(2);
+        let vote6 = await newRound7.connect(addr6).vote(2);
         let vote7 = await newRound7.connect(addr7).vote(3);
-        
+        let vote8 = await newRound7.connect(addr8).vote(3);
+
         await newRound7.connect(owner).closeRound();
-        let tally = await newRound7.connect(owner).tallyVotesSPOG();  
+        await newRound7.connect(owner).tallyVotesSPOG();
+
+        expect(newRound7.connect(owner).tallyVotesSPOG())
+        .to.emit(newRound7, "VotesTallied")
+        .withArgs(0, 1, 1000000000000000000);
       });
 
-        // @audit: There are no floats in solidity.
-        //         The values you get back from VotesTallied are in Wei.
-        //         You might need to:
-        //           - get the event emitted by tallyVotesSPOG
-        //           - read the values from the event
-        //           - choose a precision for the expectation
-        //           - expect that each value is +/- equal to expectation (using the expectation precision, e.g. 100 wei)
-
-
-        // await expect(tally)
-        //   .to.emit(newRound4, "VotesTallied")
-        //   .withArgs(1.25, 0.3055555556, 0.9444444444);
     });
     describe("FREE", function () {
       it("only owner can tally votes", async function () {
@@ -141,7 +138,21 @@ describe("Round", function () {
           .to.be.reverted;
       });
       it("should tally votes as expected", async function () {
-        //TODO
+        newRound9 = await round.waitForDeployment();
+
+        let vote1 = await newRound9.connect(addr1).vote(1);
+        let vote2 = await newRound9.connect(addr2).vote(1);
+        let vote3 = await newRound9.connect(addr3).vote(1);
+        let vote4 = await newRound9.connect(addr4).vote(2);
+        let vote6 = await newRound9.connect(addr6).vote(2);
+        let vote7 = await newRound9.connect(addr7).vote(3);
+        let vote8 = await newRound9.connect(addr8).vote(3);
+
+        await newRound9.connect(owner).closeRound();
+
+        expect(newRound9.connect(owner).tallyVotesFREE())
+        .to.emit(newRound7=9, "VotesTallied")
+        .withArgs(0, 1, 1);
       });
     });
   });

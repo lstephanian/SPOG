@@ -1,5 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
-let { expect } = require('chai')
+let { expect } = require('chai');
+
+// const { ethers } = require("ethers");
 
 describe("RoundFactory", function () {
   beforeEach(async function () {
@@ -39,11 +41,13 @@ describe("RoundFactory", function () {
       
     });
     it("should mint tokens to round contract", async function () {
-      let mintAmount = 10;
+      let mintAmount = 100;
+      provider = ethers.provider;
       await rfContract.connect(owner).createRound(expContractAddy, mintAmount);
       let allRounds = await rfContract.connect(owner).allRounds();    
-      let expBalance = await expContract.balanceOf(allRounds[0]);
-      expect(await expContract.balanceOf(allRounds[0]))
+      await expContract.connect(owner).mint(allRounds[0], mintAmount);
+      let balance = await expContract.balanceOf(allRounds[0]);
+      expect(Number(balance))
         .to.equal(mintAmount);
     });
   });

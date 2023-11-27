@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import { ExperimentToken } from './ExperimentToken.sol';
-import "@openzeppelin/contracts/utils/math";
+import "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract Round is Ownable(msg.sender) {
     uint votesUninformed = 0;
@@ -25,14 +25,13 @@ contract Round is Ownable(msg.sender) {
     event RoundCreated(bool);
     event RoundEnded(bool);
     event VoteSubmitted(uint, uint);
-    event VotesTallied(uint, uint, uint);
+    event VotesTallied(uint informedClaimable, uint uninformedClaimable, uint abstainedClaimable);
     event BitRefundReceived(address, uint);
     ExperimentToken exp;
 
 
     constructor (address _tokenAddress){
         TOKEN_ADDRESS = _tokenAddress;
-
         emit RoundCreated(true);
     }
 
@@ -47,7 +46,7 @@ contract Round is Ownable(msg.sender) {
 
     function vote(uint _voteType) public {
         require(_voteType > 0 && _voteType < 4, 'needs to be in range');
-        require(voteMap[msg.sender] == [], 'can only vote once');
+        require(voteMap[msg.sender] == 0, 'can only vote once');
 
         voteMap[msg.sender] = _voteType;
 
@@ -78,7 +77,6 @@ contract Round is Ownable(msg.sender) {
         uint b = (votesTotal/2 - votesUninformed / votesTotal) * votesInformed / votesTotal; 
         uint v = ((votesTotal - 1) / (votesTotal * votesTotal)) + (1  / votesTotal);
 
-
         // allows for up to 10**59 votes
         if (v * 10**18 > 3**18) {
             v = 3**18;
@@ -87,7 +85,6 @@ contract Round is Ownable(msg.sender) {
         if (b > 1) {
             informedClaimable = b-1;
         }
-
         if (b > 0) {
             uninformedClaimable = b;
         }
