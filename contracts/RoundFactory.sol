@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
+//author: @lstephanian
+
 pragma solidity ^0.8.9;
 
 import './Round.sol';
