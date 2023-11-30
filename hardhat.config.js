@@ -1,4 +1,6 @@
 require('@nomicfoundation/hardhat-toolbox');
+require("@nomicfoundation/hardhat-verify");
+
 
 // NEVER record important private keys in your code - this is for demo purposes
 const GOERLI_TESTNET_PRIVATE_KEY = process.env.PRIV_KEY;
@@ -15,14 +17,13 @@ module.exports = {
     arbitrumGoerli: {
       url: 'https://goerli-rollup.arbitrum.io/rpc',
       chainId: 421613,
-      accounts: [GOERLI_TESTNET_PRIVATE_KEY]
-    },
-    arbitrumOne: {
-      url: 'https://arb1.arbitrum.io/rpc',
-      //accounts: [ARBITRUM_MAINNET_TEMPORARY_PRIVATE_KEY]
+      accounts: [GOERLI_TESTNET_PRIVATE_KEY],
     },
   },
   etherscan: {
     apiKey: ETHERSCAN_API_KEY,
+  },
+  sourcify: {
+    enabled: true
   },
 };

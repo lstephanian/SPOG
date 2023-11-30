@@ -1,7 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 let { expect } = require('chai')
 
-describe("Round", function () {
+describe("ExperimentToken", function () {
   beforeEach(async function () {
     [owner, addr1, addr2, addr3, addr4, addr5, addr6, addr7, addr8] = await ethers.getSigners();
 
