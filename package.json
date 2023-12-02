@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "'",
   "main": "index.js",
+  "workspaces": [
+    "packages/a"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,8 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.1",
-    "hardhat": "^2.19.1"
+    "hardhat": "^2.19.1",
+    "lerna": "^8.0.0"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
@@ -20,6 +23,7 @@
     "chai": "^4.3.10",
     "ethers": "^6.8.1",
     "glob": "^7.2.0",
+    "graphviz": "^0.0.9",
     "hardhat-deploy": "^0.11.44",
     "hardhat-deploy-ethers": "^0.4.1"
   }
