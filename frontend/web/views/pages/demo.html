@@ -12,6 +12,9 @@
 {% endblock %}
 
 {% block js %}
+  <script type="text/javascript">
+    const abi = {{ abi|safe }};
+  </script>
   <script type="module" src="/dist/{{ manifest['public/custom/wallet.js'].file }}"></script>
 {% endblock %}
 

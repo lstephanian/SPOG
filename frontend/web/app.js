@@ -2,11 +2,15 @@ import path from 'path';
 import fs from 'fs';
 import nunjucks from 'nunjucks';
 import express from 'express';
+import dotenv from 'dotenv';
+
 const app = express();
 const port = 3000;
 
+dotenv.config({ path: './.env.local' });
 app.use(express.static('public/libs'));
 app.use('/dist', express.static('dist'))
+app.use('/assets', express.static('dist/assets'))
 
 nunjucks.configure('views', {autoescape: true, express: app});
 const env = nunjucks.configure('views', {autoescape: true, express: app});
@@ -17,7 +21,9 @@ app.get('/', (req, res) => {
 });
 
 app.get('/demo', (req, res) => {
-  res.render('pages/demo.html', {});
+  res.render('pages/demo.html', {
+    'abi': fs.readFileSync(`./abi/${process.env.VITE_CONTRACT_ADDRESS}.json`, 'utf8')
+  });
 });
 
 app.get('/research', (req, res) => {

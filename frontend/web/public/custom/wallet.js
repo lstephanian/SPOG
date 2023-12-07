@@ -1,12 +1,12 @@
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi'
 import { getContract, prepareWriteContract, writeContract, disconnect, getAccount, signMessage } from '@wagmi/core'
-import { mainnet, arbitrumGoerli, arbitrumNova, arbitrumSepolia, arbitrum } from '@wagmi/core/chains'
+import { mainnet, arbitrum, arbitrumSepolia, sepolia } from '@wagmi/core/chains'
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
-// 1. Define constants
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
 const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS
 
-// 2. Create wagmiConfig
 const metadata = {
   name: 'Web3Modal',
   description: 'Web3Modal Example',
@@ -14,38 +14,43 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 }
 
-const defaultChain = arbitrum
-arbitrumGoerli.name = 'Arb Goerli'
-arbitrumNova.name = 'Arb Nova'
 arbitrumSepolia.name = 'Arb Sepolia'
-const chains = [arbitrumGoerli, arbitrumNova, arbitrumSepolia, defaultChain]
+
+const defaultChain = arbitrumSepolia
+const chains = [defaultChain, arbitrum]
 const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata })
 
 // 3. Create modal
 const modal = createWeb3Modal({ wagmiConfig, projectId, chains, defaultChain, themeMode: "light" })
-// modal.subscribeState(newState => {
-//   if (newState.open) {
-//     disconnect()
-//   }
-// })
 
 let links = document.getElementsByClassName('contract-vote')
 for (let i = 0, iLength = links.length; i < iLength; i++) {
-    links[i].addEventListener('click', function(e) {
-      e.preventDefault();
+  links[i].addEventListener('click', async function(e) {
+    e.preventDefault();
 
-      var _voteType = parseInt(e.target.getAttribute('data-vote'))
-      var account = getAccount()
-      if (account.isConnected) {
-        writeContract({
+    var account = getAccount()
+    if (account.isConnected) {
+      try {
+        await writeContract({
           address: contractAddress,
           account: account,
-          abi: {"name": "vote", "inputs": [{"indexed": true, "internalType": "uint", "name": "_voteType", "type": "uint"}], "outputs": [], "stateMutability": "nonpayable", "type": "function"},
+          abi: abi,
           functionName: 'vote',
-          args: [_voteType],
-          // abi: [{"inputs":[],"name":"feed","outputs":[],"stateMutability":"nonpayable","type":"function"}],
-          // functionName: 'feed',
+          args: [e.target.getAttribute('data-vote')],
         })
+
+        Swal.fire({
+          title: 'Vote',
+          text: 'Thank you for voting',
+          icon: 'success',
+        });
+      } catch (error) {
+        Swal.fire({
+          title: 'Error Voting',
+          text: error.shortMessage,
+          icon: 'error',
+        });
       }
-    });
+    }
+  });
 }
