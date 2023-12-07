@@ -19,6 +19,7 @@
     "express": "^4.18.2",
     "gulp-transform": "^3.0.5",
     "nunjucks": "^3.2.4",
+    "sweetalert2": "^11.10.1",
     "viem": "^1.17.1",
     "vite": "^4.5.0"
   },
