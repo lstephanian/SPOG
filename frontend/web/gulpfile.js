@@ -1,11 +1,13 @@
-import nodemon from 'gulp-nodemon';
-import { exec } from 'child_process';
 import gulp from 'gulp';
 import pkg from 'gulp';
-import path from 'path';
-import fs from 'fs';
-import solc from 'solc';
+import nodemon from 'gulp-nodemon';
+import download from 'gulp-download';
+import transform from 'gulp-transform';
+import rename from 'gulp-rename';
+import dotenv from 'dotenv';
+import { exec } from 'child_process';
 
+dotenv.config({ path: './.env.local' });
 const { task, series } = pkg;
 
 task('vite-build', (cb) => {
@@ -31,20 +33,14 @@ task('nodemon', (cb) => {
   });
 });
 
-gulp.task('compile-abi', (cb => {
-  const contractSource = '../../contracts/Round.sol';
-  var input = {
-    language: 'Solidity',
-    sources: {'Round.sol': {content: fs.readFileSync(contractSource, 'utf8')}},
-    settings: {outputSelection: {'*': {'*': ['*']}}}
-  }
+gulp.task('download-abi', () => {
+  const contractAddress = process.env.VITE_CONTRACT_ADDRESS;
+  const abiUrl = `https://api-sepolia.arbiscan.io/api?module=contract&action=getabi&address=${contractAddress}`;
 
-  var output = JSON.parse(solc.compile(JSON.stringify(input)));
-  for (var contractName in output.contracts['Round.sol']) {
-    console.log(contractName + ': ' + output.contracts['Round.sol'][contractName].evm.bytecode.object);
-  }
+  return download(abiUrl)
+    .pipe(rename(`${contractAddress}.json`))
+    .pipe(transform('utf8', (content) => { return JSON.parse(content).result }))
+    .pipe(gulp.dest('./abi/'));
+});
 
-  cb();
-}));
-
-task('default', series('vite-build', 'nodemon'));
+task('default', series('download-abi', 'vite-build', 'nodemon'));
