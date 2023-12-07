@@ -7,8 +7,8 @@ import rename from 'gulp-rename';
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
 
-dotenv.config({ path: './.env.local' });
 const { task, series } = pkg;
+dotenv.config({path: './.env'});
 
 task('vite-build', (cb) => {
   exec('vite build', (err, stdout, stderr) => {

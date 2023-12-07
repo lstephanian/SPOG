@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 const app = express();
 const port = 3000;
 
-dotenv.config({ path: './.env.local' });
+dotenv.config({path: './.env'});
 app.use(express.static('public/libs'));
 app.use('/dist', express.static('dist'))
 app.use('/assets', express.static('dist/assets'))
