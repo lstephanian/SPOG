@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
 const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID
-const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS
 
 const metadata = {
   name: 'Web3Modal',
