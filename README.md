@@ -1,6 +1,7 @@
 <b>SPOG: Simple ParticipatiOn Governance</b>
 
 <b>Instructions</b>
+
 You are now taking part in an economic study. You will be matched with other players to play 10 rounds of a simple voting game. In each round, one member of your group will be randomly selected to be the manager, and the remainder will be voters.
 
 Your group is voting to pick a project. The better the project picked, the more points the group gets. A bad project has no benefits for the group and pays no points. The decisions of the voters help determine the quality of the project, by their choice among the following options:
