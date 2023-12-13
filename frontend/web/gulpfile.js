@@ -1,4 +1,5 @@
 import gulp from 'gulp';
+import shell from 'gulp-shell';
 import pkg from 'gulp';
 import nodemon from 'gulp-nodemon';
 import download from 'gulp-download';
@@ -7,23 +8,17 @@ import rename from 'gulp-rename';
 import dotenv from 'dotenv';
 import { exec } from 'child_process';
 
-const { task, series } = pkg;
+const { task, parallel } = pkg;
 dotenv.config({path: './.env'});
 
-task('vite-build', (cb) => {
-  exec('vite build', (err, stdout, stderr) => {
-    console.log(stdout);
-    console.error(stderr);
-    cb(err);
-  });
-});
+task('vite-build', shell.task(['vite build --watch']));
 
 task('nodemon', (cb) => {
   let started = false;
   return nodemon({
     script: 'app.js',
     ext: '*',
-    ignore: ['node_modules/'],
+    ignore: ['node_modules/', 'dist/', 'public/custom/', 'abi/'],
     // env: {'PROJECT_ID': ''},
   }).on('start', () => {
     if (!started) {
@@ -43,4 +38,4 @@ gulp.task('download-abi', () => {
     .pipe(gulp.dest('./abi/'));
 });
 
-task('default', series('download-abi', 'vite-build', 'nodemon'));
+task('default', parallel('download-abi', 'vite-build', 'nodemon'));
