@@ -1,3 +1,7 @@
+.sidebar {
+  position: absolute;
+}
+
 .btn-toggle {
   display: inline-flex;
   border: 0;
@@ -18,4 +22,20 @@
 .btn-toggle.collapsed::after {
   transform: rotate(0deg);
   right: 3px;
+}
+
+@media (max-width: 767px)  {
+  .sidebar {
+    position: static;
+  }
+}
+
+@media (min-width: 1440px)  {
+  main.px-md-5 {
+    margin-left: 240px !important;
+  }
+
+  .sidebar {
+    max-width: 216px !important;
+  }
 }
