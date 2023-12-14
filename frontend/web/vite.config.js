@@ -5,20 +5,24 @@ import { resolve } from 'path';
 const publicDir = 'public/custom';
 
 // Dynamically generate entry points
-function generateEntryPoints() {
-  const entryPoints = {};
-  const staticDir = resolve(__dirname, publicDir);
+function generateEntryPoints(dir) {
+  var entryPoints = {};
+  const staticDir = resolve(__dirname, dir);
 
   // Read the files in the "public/pages" directory
   const files = readdirSync(staticDir);
 
   // Create entry points for JavaScript and CSS files
   files.forEach((file) => {
+    if (file.indexOf('.') === -1) {
+      entryPoints = Object.assign({}, entryPoints, generateEntryPoints(`${dir}/${file}`));
+      return;
+    }
     const ext = file.split('.').pop();
     const fileName = file.replace(`.${ext}`, '');
 
     if (ext === 'js' || ext === 'css') {
-      entryPoints[`${publicDir}/${fileName}`] = `${publicDir}/${file}`;
+      entryPoints[`${dir}/${fileName}`] = `${dir}/${file}`;
     }
   });
 
@@ -30,7 +34,7 @@ export default defineConfig({
   build: {
     manifest: true,
     rollupOptions: {
-      input: generateEntryPoints(),
+      input: generateEntryPoints(publicDir),
     },
     outDir: 'dist',
   },

@@ -1,30 +1,26 @@
 import gulp from 'gulp';
+import shell from 'gulp-shell';
 import pkg from 'gulp';
 import nodemon from 'gulp-nodemon';
-import download from 'gulp-download';
+import download from 'gulp-download-stream';
 import transform from 'gulp-transform';
 import rename from 'gulp-rename';
+import wait from 'gulp-wait';
 import dotenv from 'dotenv';
-import { exec } from 'child_process';
+import yaml from 'js-yaml';
+import fs from 'fs/promises';
 
-dotenv.config({ path: './.env.local' });
-const { task, series } = pkg;
+const { task, parallel } = pkg;
+dotenv.config({path: './.env'});
 
-task('vite-build', (cb) => {
-  exec('vite build', (err, stdout, stderr) => {
-    console.log(stdout);
-    console.error(stderr);
-    cb(err);
-  });
-});
+task('vite-build', shell.task(['vite build --watch']));
 
 task('nodemon', (cb) => {
   let started = false;
   return nodemon({
     script: 'app.js',
     ext: '*',
-    ignore: ['node_modules/'],
-    // env: {'PROJECT_ID': ''},
+    ignore: ['node_modules/', 'dist/', 'abi/', 'public/custom/'],
   }).on('start', () => {
     if (!started) {
       cb();
@@ -33,14 +29,27 @@ task('nodemon', (cb) => {
   });
 });
 
-gulp.task('download-abi', () => {
-  const contractAddress = process.env.VITE_CONTRACT_ADDRESS;
-  const abiUrl = `https://api-sepolia.arbiscan.io/api?module=contract&action=getabi&address=${contractAddress}`;
+gulp.task('download-abi', async () => {
+  const contracts = yaml.load(await fs.readFile('./../../voting-rounds.yml', 'utf8'));
 
-  return download(abiUrl)
-    .pipe(rename(`${contractAddress}.json`))
-    .pipe(transform('utf8', (content) => { return JSON.parse(content).result }))
-    .pipe(gulp.dest('./abi/'));
+  for (const contract of contracts) {
+    const abiUrl = `https://api-sepolia.arbiscan.io/api?module=contract&action=getabi&address=${contract.address}`;
+
+    await new Promise((resolve) => {
+      download(abiUrl)
+        .pipe(wait(300))
+        .pipe(rename(`${contract.address}.json`))
+        .pipe(transform('utf8', (content) => JSON.parse(content).result))
+        .pipe(gulp.dest('./abi/'))
+        .on('end', () => {
+          resolve();
+        })
+        .on('error', (err) => {
+          console.error(`Error downloading ABI for ${contract.address}: ${err.message}`);
+          resolve();
+        });
+    });
+  }
 });
 
-task('default', series('download-abi', 'vite-build', 'nodemon'));
+task('default', parallel('download-abi', 'vite-build', 'nodemon'));
