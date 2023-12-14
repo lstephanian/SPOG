@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} - Demo{% endblock %}
+{% block title %} - Round {{ round }}{% endblock %}
 
 {% block css %}
 <style>
@@ -8,22 +8,36 @@
   padding: 10px;
   display: inline-block;
 }
+
+#error-message {
+  color: red;
+  padding: 8px 0 0 10px;
+}
+
+#loading {
+  margin: 11px 0 0 20px;
+}
 </style>
 {% endblock %}
 
 {% block js %}
   <script type="text/javascript">
     const abi = {{ abi|safe }};
+    const contractAddress = "{{ contractAddress }}";
   </script>
-  <script type="module" src="/dist/{{ manifest['public/custom/wallet.js'].file }}"></script>
+  <script type="module" src="/dist/{{ manifest['public/custom/js/wallet.js'].file }}"></script>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-3">
-  <h2>Demo</h2>
+  <h2>{{ contract.name }}</h2>
   <div class="d-flex justify-content-start">
-    <div class="p-2"><w3m-network-button> </w3m-network-button></div>
+    <!-- <div class="p-2"><w3m-network-button> </w3m-network-button></div> -->
     <div class="p-2"><w3m-button></w3m-button></div>
+
+    <div id="loading" class="spinner-grow text-primary" style="display: none;" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
   </div>
 
   <br>
@@ -32,5 +46,7 @@
     <li><a href="#" class="contract-vote" data-vote="2">Vote Informed</a></li>
     <li><a href="#" class="contract-vote" data-vote="0">Abstain</a></li>
   </ul>
+
+  <div id="error-message"></div>
 </div>
 {% endblock %}

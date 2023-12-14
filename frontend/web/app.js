@@ -3,6 +3,7 @@ import fs from 'fs';
 import nunjucks from 'nunjucks';
 import express from 'express';
 import dotenv from 'dotenv';
+import yaml from 'js-yaml';
 
 const app = express();
 const port = 3000;
@@ -15,14 +16,20 @@ app.use('/assets', express.static('dist/assets'))
 nunjucks.configure('views', {autoescape: true, express: app});
 const env = nunjucks.configure('views', {autoescape: true, express: app});
 env.addGlobal('manifest', JSON.parse(fs.readFileSync('dist/manifest.json', 'utf-8')));
+const contractsList = yaml.load(fs.readFileSync('./../../voting-rounds.yml', 'utf8'));
+const contracts = contractsList.reduce((contracts, contract) => Object.assign({}, contracts, {[contract.address]: contract}), {});
+env.addGlobal('contracts', contracts);
+env.addGlobal('contractsList', contractsList);
 
 app.get('/', (req, res) => {
   res.render('pages/spog.html', {});
 });
 
-app.get('/demo', (req, res) => {
+app.get('/demo/:contractAddress', (req, res) => {
   res.render('pages/demo.html', {
-    'abi': fs.readFileSync(`./abi/${process.env.VITE_CONTRACT_ADDRESS}.json`, 'utf8')
+    'contractAddress': req.params.contractAddress,
+    'contract': contracts[req.params.contractAddress],
+    'abi': fs.readFileSync(`./abi/${req.params.contractAddress}.json`, 'utf8')
   });
 });
 
