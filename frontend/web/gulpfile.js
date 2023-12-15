@@ -1,6 +1,6 @@
+import { exec } from 'child_process';
 import gulp from 'gulp';
 import shell from 'gulp-shell';
-import pkg from 'gulp';
 import nodemon from 'gulp-nodemon';
 import download from 'gulp-download-stream';
 import transform from 'gulp-transform';
@@ -10,17 +10,25 @@ import dotenv from 'dotenv';
 import yaml from 'js-yaml';
 import fs from 'fs/promises';
 
-const { task, parallel } = pkg;
+const { task, series, parallel } = gulp;
 dotenv.config({path: './.env'});
 
-task('vite-build', shell.task(['vite build --watch']));
+task('vite-watch', shell.task(['vite build --watch']));
+
+task('vite-build', (cb) => {
+  exec('vite build', (err, stdout, stderr) => {
+    console.log(stdout);
+    console.error(stderr);
+    cb(err);
+  });
+});
 
 task('nodemon', (cb) => {
   let started = false;
   return nodemon({
     script: 'app.js',
     ext: '*',
-    ignore: ['node_modules/', 'dist/', 'abi/', 'public/custom/'],
+    ignore: ['node_modules/', 'dist/', 'abi/', 'public/'],
   }).on('start', () => {
     if (!started) {
       cb();
@@ -29,7 +37,7 @@ task('nodemon', (cb) => {
   });
 });
 
-gulp.task('download-abi', async () => {
+task('download-abi', async (cb) => {
   const contracts = yaml.load(await fs.readFile('./../../voting-rounds.yml', 'utf8'));
 
   for (const contract of contracts) {
@@ -50,6 +58,9 @@ gulp.task('download-abi', async () => {
         });
     });
   }
+
+  cb()
 });
 
-task('default', parallel('download-abi', 'vite-build', 'nodemon'));
+task('default', series('download-abi', 'vite-build', 'nodemon'));
+task('dev', parallel('nodemon', 'download-abi', 'vite-watch'));
