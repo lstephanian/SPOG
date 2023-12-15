@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npx gulp",
+    "start dev": "npx gulp dev",
     "postinstall": "copyfiles -f -u 1 node_modules/bootstrap/dist/js/bootstrap.bundle.min.js public/libs/js && copyfiles -f -u 1 node_modules/bootstrap/dist/css/bootstrap.min.css public/libs/css && copyfiles -f -u 1 node_modules/bootstrap/dist/js/bootstrap.min.js public/libs/js"
   },
   "keywords": [],
