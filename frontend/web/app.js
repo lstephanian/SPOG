@@ -32,7 +32,6 @@ app.get('/demo/:contractAddress', async (req, res) => {
   const events = abi.filter(i => i.type === 'event');
   const web3 = new Web3(process.env.WEB3_PROJECT_URL);
 
-  const topics = ['VoteSubmitted(int256,int256)', 'RoundCreated(bool)', 'RoundEnded(bool)'];
   const topicsMapping = {};
   events.forEach(event => {
       const signature = `${event.name}(${event.inputs.map(j => j.internalType).join(',')})`;
@@ -47,8 +46,13 @@ app.get('/demo/:contractAddress', async (req, res) => {
   });
 
   const voteAbi = abi.find((item) => item.name === 'VoteSubmitted');
+  const voteTypeMap = {'informedClaimable': 3, 'uninformedClaimable': 2, 'abstainedClaimable': 1}
+  const swappedVoteTypeMap = Object.fromEntries(
+    Object.entries(voteTypeMap).map(([key, value]) => [value, key])
+  );
   let ended = false;
-  let votes = {}
+  let votes = {};
+  let votesTallied = null;
   logs.forEach(log => {
     const topics = log.topics.map(t => topicsMapping[t] || t);
     if (topics.includes('RoundEnded(bool)')) {
@@ -57,11 +61,16 @@ app.get('/demo/:contractAddress', async (req, res) => {
 
     if (topics.includes('VoteSubmitted(int256,int256)')) {
       const decodedData = web3.eth.abi.decodeLog(voteAbi.inputs, log.data);
-      if (!votes[decodedData['0']]) {
-        votes[decodedData['0']] = 0;
+      const key = swappedVoteTypeMap[decodedData['0']]
+      if (!votes[key]) {
+        votes[key] = 0;
       }
 
-      votes[decodedData['0']] += 1;
+      votes[key] += 1;
+    }
+
+    if (topics.includes('VotesTallied(int256,int256,int256)')) {
+      votesTallied = web3.eth.abi.decodeLog(voteAbi.inputs, log.data);
     }
   });
 
@@ -70,7 +79,8 @@ app.get('/demo/:contractAddress', async (req, res) => {
     'contract': contracts[req.params.contractAddress],
     'abi': abiString,
     'ended': ended,
-    'votes': votes,
+    'votes': votesTallied || votes,
+    'voteTypeMap': voteTypeMap,
   });
 });
 
