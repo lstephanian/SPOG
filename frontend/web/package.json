@@ -22,7 +22,8 @@
     "nunjucks": "^3.2.4",
     "sweetalert2": "^11.10.1",
     "viem": "^1.17.1",
-    "vite": "^4.5.0"
+    "vite": "^4.5.0",
+    "web3": "^4.3.0"
   },
   "devDependencies": {
     "copyfiles": "^2.4.1",
