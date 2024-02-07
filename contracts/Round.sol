@@ -22,32 +22,17 @@ contract Round is Ownable(msg.sender) {
     mapping(address => bool) private withdrawalMap;
 
     address public immutable TOKEN_ADDRESS;
-    bool public ended = false;
 
-    event RoundCreated(bool);
-    event RoundEnded(bool);
     event VoteSubmitted(int, int);
     event VotesTallied(int informedClaimable, int uninformedClaimable, int abstainedClaimable);
     event BitRefundReceived(address, int);
     ExperimentToken exp;
 
-
     constructor (address _tokenAddress){
         TOKEN_ADDRESS = _tokenAddress;
-        emit RoundCreated(true);
-    }
-
-    function closeRound() public onlyOwner {
-        ended = true;
-        emit RoundEnded(ended);
-    }
-
-    function getRoundStatus() public view returns(bool) {
-        return(ended);
     }
 
     function vote(int _voteType) public {
-        require(ended==false, "round closed");
         require(_voteType > 0 && _voteType < 4, 'needs to be in range');
         require(voteMap[msg.sender] == 0, 'can only vote once');
 
@@ -67,12 +52,7 @@ contract Round is Ownable(msg.sender) {
         }
     }
 
-    function getVoterStatus(address beneficiary) public view returns(int) {
-        return(voteMap[beneficiary]);
-    }
-
     function tallyVotesSPOG() public onlyOwner {
-        require(ended, 'round is still open');
 
         int votesTotal = votesInformed + votesUninformed; 
         require(votesTotal > 0, "no votes submitted");
@@ -98,7 +78,6 @@ contract Round is Ownable(msg.sender) {
     }
     
     function tallyVotesFREE() public onlyOwner {
-        require(ended, 'round is still open');
 
         int votesTotal = votesInformed + votesUninformed;
         require(votesTotal > 0, "no votes submitted");
@@ -115,27 +94,5 @@ contract Round is Ownable(msg.sender) {
         }
     
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
-    }
-
-    function claimFunds() public {
-        require(ended, 'round is still open');
-        require(withdrawalMap[msg.sender] == false, 'can only withdraw once');
-        int amount;
-
-        if (voteMap[msg.sender] == 0){
-            amount = abstainedClaimable;
-        }
-        if (voteMap[msg.sender] == 1){
-            amount = votesUninformed;
-        }
-        if (voteMap[msg.sender] == 2){
-            amount = votesInformed;
-        }        
-        
-        withdrawalMap[msg.sender] = true;
-        
-        exp = ExperimentToken(TOKEN_ADDRESS);
-        require(exp.transfer(msg.sender, uint(amount)));
-        emit BitRefundReceived(msg.sender, amount);
     }
 }
