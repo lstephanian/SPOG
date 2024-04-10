@@ -64,23 +64,28 @@ contract Round is Ownable(msg.sender) {
         int votesTotal = votesInformed + votesUninformed; 
         require(votesTotal > 0, "no votes submitted");
 
-        int b = (votesTotal/2 - votesUninformed / votesTotal) * votesInformed / votesTotal; 
+        int halfVotesTotal = votesTotal / 2;
+        int uninformedRatio = votesUninformed / votesTotal;
+        int informedRatio = votesInformed / votesTotal;
+        int b = (halfVotesTotal - uninformedRatio) * informedRatio; 
+
+        // Ensure that 'b' is positive
+        if (b < 0) {
+            b = 0;
+        }
+
         int v = ((votesTotal - 1) / (votesTotal * votesTotal)) + (1  / votesTotal);
 
-        // allows for up to 10**59 votes
+        // Limit 'v' to prevent overflow
         if (v * 10**18 > 3**18) {
             v = 3**18;
         }
 
-        if (b > 1) {
-            informedClaimable = b-1;
-        }
-        if (b > 0) {
-            uninformedClaimable = b;
-        }
-        if (b-v > 0) {
-            abstainedClaimable = b * 10**18 > v ? b * 10**18 - v : int(0);
-        }
+        // Calculate claimable amounts
+        informedClaimable = Math.max(b - 1, 0);
+        uninformedClaimable = Math.max(b, 0);
+        abstainedClaimable = Math.max(b * 10**18 - v, 0);
+
         emit VotesTallied(informedClaimable, uninformedClaimable, abstainedClaimable);
     }
     
